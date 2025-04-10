@@ -4,21 +4,24 @@ import by.kukhatskavolets.dto.requests.CommentRequestTo
 import by.kukhatskavolets.dto.responses.CommentResponseTo
 import by.kukhatskavolets.mappers.toEntity
 import by.kukhatskavolets.mappers.toResponse
-import by.kukhatskavolets.repositories.inMemory.CommentInMemoryRepository
+import by.kukhatskavolets.repositories.CommentRepository
+import by.kukhatskavolets.repositories.TweetRepository
 import org.springframework.stereotype.Service
 
 @Service
 class CommentService(
-    private val commentRepository: CommentInMemoryRepository,
+    private val commentRepository: CommentRepository,
+    private val tweetRepository: TweetRepository,
 ) {
     fun createComment(commentRequestTo: CommentRequestTo): CommentResponseTo {
-        val comment = commentRequestTo.toEntity()
+        val tweet = tweetRepository.findById(commentRequestTo.tweetId).orElseThrow { NoSuchElementException() }
+        val comment = commentRequestTo.toEntity(tweet)
         val savedComment = commentRepository.save(comment)
         return savedComment.toResponse()
     }
 
     fun getCommentById(id: Long): CommentResponseTo {
-        val comment = commentRepository.findById(id)
+        val comment = commentRepository.findById(id).orElseThrow { NoSuchElementException() }
         return comment.toResponse()
     }
 
@@ -26,17 +29,18 @@ class CommentService(
         commentRepository.findAll().map { it.toResponse() }
 
     fun updateComment(id: Long, commentRequestTo: CommentRequestTo): CommentResponseTo {
-        val updatedComment = commentRequestTo.toEntity().apply { this.id = id }
-        return commentRepository.update(updatedComment).toResponse()
+        val tweet = tweetRepository.findById(commentRequestTo.tweetId).orElseThrow { NoSuchElementException() }
+        val updatedComment = commentRequestTo.toEntity(tweet).apply { this.id = id }
+        return commentRepository.save(updatedComment).toResponse()
     }
 
     fun deleteComment(id: Long) {
+        commentRepository.findById(id).orElseThrow { NoSuchElementException() }
         commentRepository.deleteById(id)
     }
 
-    fun getCommentsByTweetId(issueId: Long): List<CommentResponseTo> {
-        return commentRepository.findAll()
-            .filter { it.tweetId == issueId }
-            .map { it.toResponse() }
+    fun getCommentsByTweetId(tweetId: Long): List<CommentResponseTo> {
+        val tweet = tweetRepository.findById(tweetId).orElseThrow { NoSuchElementException() }
+        return tweet.comments.map { it.toResponse() }
     }
 }

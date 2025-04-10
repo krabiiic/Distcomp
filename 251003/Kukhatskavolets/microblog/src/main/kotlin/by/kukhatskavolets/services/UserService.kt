@@ -4,14 +4,14 @@ import by.kukhatskavolets.dto.requests.UserRequestTo
 import by.kukhatskavolets.dto.responses.UserResponseTo
 import by.kukhatskavolets.mappers.toEntity
 import by.kukhatskavolets.mappers.toResponse
-import by.kukhatskavolets.repositories.inMemory.TweetInMemoryRepository
-import by.kukhatskavolets.repositories.inMemory.UserInMemoryRepository
+import by.kukhatskavolets.repositories.TweetRepository
+import by.kukhatskavolets.repositories.UserRepository
 import org.springframework.stereotype.Service
 
 @Service
 class UserService(
-    private val userRepository: UserInMemoryRepository,
-    private val tweetRepository: TweetInMemoryRepository,
+    private val userRepository: UserRepository,
+    private val tweetRepository: TweetRepository,
 ) {
     fun createUser(userRequestTo: UserRequestTo): UserResponseTo {
         val user = userRequestTo.toEntity()
@@ -20,7 +20,7 @@ class UserService(
     }
 
     fun getUserById(id: Long): UserResponseTo {
-        val user = userRepository.findById(id)
+        val user = userRepository.findById(id).orElseThrow { NoSuchElementException() }
         return user.toResponse()
     }
 
@@ -29,16 +29,16 @@ class UserService(
 
     fun updateUser(id: Long, userRequestTo: UserRequestTo): UserResponseTo {
         val updatedUser = userRequestTo.toEntity().apply { this.id = id }
-        return userRepository.update(updatedUser).toResponse()
+        return userRepository.save(updatedUser).toResponse()
     }
 
     fun deleteUser(id: Long) {
+        userRepository.findById(id).orElseThrow { NoSuchElementException() }
         userRepository.deleteById(id)
     }
 
-    fun getUserByTweetId(tweetId: Long): UserResponseTo {
-        val tweet = tweetRepository.findById(tweetId)
-        val user = userRepository.findById(tweet.userId)
-        return user.toResponse()
+    fun getUserByTweetId(tweetId: Long): UserResponseTo? {
+        val tweet = tweetRepository.findById(tweetId).orElseThrow { NoSuchElementException() }
+        return tweet.user.toResponse()
     }
 }

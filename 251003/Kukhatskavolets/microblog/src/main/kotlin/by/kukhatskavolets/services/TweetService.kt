@@ -2,30 +2,33 @@ package by.kukhatskavolets.services
 
 import by.kukhatskavolets.dto.requests.TweetRequestTo
 import by.kukhatskavolets.dto.responses.TweetResponseTo
+import by.kukhatskavolets.entities.Mark
+import by.kukhatskavolets.entities.Tweet
+import by.kukhatskavolets.entities.User
 import by.kukhatskavolets.mappers.toEntity
 import by.kukhatskavolets.mappers.toResponse
-import by.kukhatskavolets.repositories.inMemory.MarkInMemoryRepository
-import by.kukhatskavolets.repositories.inMemory.TweetInMemoryRepository
-import by.kukhatskavolets.repositories.inMemory.TweetMarkInMemoryRepository
-import by.kukhatskavolets.repositories.inMemory.UserInMemoryRepository
+import by.kukhatskavolets.repositories.TweetRepository
+import by.kukhatskavolets.repositories.UserRepository
+import jakarta.persistence.criteria.Predicate
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
 class TweetService(
-    private val tweetRepository: TweetInMemoryRepository,
-    private val markRepository: MarkInMemoryRepository,
-    private val tweetMarkRepository: TweetMarkInMemoryRepository,
-    private val userRepository: UserInMemoryRepository,
+    private val tweetRepository: TweetRepository,
+    private val userRepository: UserRepository,
 ) {
     fun createTweet(tweetRequestTo: TweetRequestTo): TweetResponseTo {
-        val tweet = tweetRequestTo.toEntity()
+        val user = userRepository.findById(tweetRequestTo.userId).orElseThrow { NoSuchElementException() }
+        val marks = tweetRequestTo.marks.map { Mark(name = it) }.toMutableSet()
+        val tweet = tweetRequestTo.toEntity(user, marks)
         val savedTweet = tweetRepository.save(tweet)
         return savedTweet.toResponse()
     }
 
     fun getTweetById(id: Long): TweetResponseTo {
-        val tweet = tweetRepository.findById(id)
+        val tweet = tweetRepository.findById(id).orElseThrow { NoSuchElementException() }
         return tweet.toResponse()
     }
 
@@ -33,14 +36,17 @@ class TweetService(
         tweetRepository.findAll().map { it.toResponse() }
 
     fun updateTweet(id: Long, tweetRequestTo: TweetRequestTo): TweetResponseTo {
-        val updatedTweet = tweetRequestTo.toEntity().apply {
+        val user = userRepository.findById(tweetRequestTo.userId).orElseThrow { NoSuchElementException() }
+        val marks = tweetRequestTo.marks.map { Mark(name = it) }.toMutableSet()
+        val updatedTweet = tweetRequestTo.toEntity(user, marks).apply {
             this.id = id
             this.modified = LocalDateTime.now()
         }
-        return tweetRepository.update(updatedTweet).toResponse()
+        return tweetRepository.save(updatedTweet).toResponse()
     }
 
     fun deleteTweet(id: Long) {
+        tweetRepository.findById(id).orElseThrow { NoSuchElementException() }
         tweetRepository.deleteById(id)
     }
 
@@ -61,33 +67,25 @@ class TweetService(
     private fun getTweetIdsByMarkNames(markNames: List<String>?): Set<Long>? {
         if (markNames.isNullOrEmpty()) return null
 
-        val markIdsByNames = markRepository.findAll()
-            .filter { mark -> markNames.any { it.contains(mark.name, ignoreCase = true) } }
-            .map { it.id }
-            .toSet()
-
-        return tweetMarkRepository.findAll()
-            .filter { it.markId in markIdsByNames }
-            .map { it.tweetId }
-            .toSet()
+        val lowerCaseNames = markNames.map { it.lowercase() }
+        return tweetRepository
+            .findByAllMarkNames(lowerCaseNames, lowerCaseNames.count().toLong())
+            .map { it.id }.toSet()
     }
 
     private fun getTweetIdsByMarkIds(markIds: List<Long>?): Set<Long>? {
         if (markIds.isNullOrEmpty()) return null
 
-        return tweetMarkRepository.findAll()
-            .filter { it.markId in markIds }
-            .map { it.tweetId }
-            .toSet()
+        return tweetRepository
+            .findByAllMarkIds(markIds, markIds.count().toLong())
+            .map { it.id }.toSet()
     }
 
     private fun getUserIdByLogin(userLogin: String?): Long? {
         if (userLogin.isNullOrBlank()) return null
 
-        val userId = userRepository.findAll()
-            .firstOrNull { it.login.equals(userLogin, ignoreCase = true) }
-            ?.id
-        return userId ?: -1
+        val user = userRepository.findByLoginIgnoreCase(userLogin)
+        return user?.id ?: -1
     }
 
     private fun filterTweets(
@@ -97,14 +95,44 @@ class TweetService(
         title: String?,
         content: String?
     ): List<TweetResponseTo> {
-        return tweetRepository.findAll()
-            .filter { tweet ->
-                (tweetIdsByNames == null || tweet.id in tweetIdsByNames) &&
-                (tweetIdsByMarkIds == null || tweet.id in tweetIdsByMarkIds) &&
-                (userId == null || tweet.userId == userId) &&
-                (title == null || tweet.title.contains(title, ignoreCase = true)) &&
-                (content == null || tweet.content.contains(content, ignoreCase = true))
+        val specification =
+            TweetSpecifications.filterByParams(tweetIdsByNames, tweetIdsByMarkIds, userId, title, content)
+        return tweetRepository.findAll(specification).map { it.toResponse() }
+    }
+}
+
+object TweetSpecifications {
+    fun filterByParams(
+        tweetIdsByNames: Set<Long>?,
+        tweetIdsByMarkIds: Set<Long>?,
+        userId: Long?,
+        title: String?,
+        content: String?
+    ): Specification<Tweet> {
+        return Specification { root, _, criteriaBuilder ->
+            val predicates = mutableListOf<Predicate>()
+
+            tweetIdsByNames?.let {
+                predicates.add(root.get<Long>("id").`in`(it))
             }
-            .map { it.toResponse() }
+
+            tweetIdsByMarkIds?.let {
+                predicates.add(root.get<Long>("id").`in`(it))
+            }
+
+            userId?.let {
+                predicates.add(criteriaBuilder.equal(root.get<User>("user").get<Long>("id"), it))
+            }
+
+            title?.let {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%${it.lowercase()}%"))
+            }
+
+            content?.let {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("content")), "%${it.lowercase()}%"))
+            }
+
+            criteriaBuilder.and(*predicates.toTypedArray())
+        }
     }
 }

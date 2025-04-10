@@ -1,9 +1,26 @@
 package by.kukhatskavolets.entities
 
+import jakarta.persistence.*
+
+@Entity
+@Table(name = "tbl_user", schema = "public")
 data class User(
-    override var id: Long = 0L,
-    val login: String,
-    val password: String,
-    val firstname: String,
-    val lastname: String
-) : Identifiable
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long = 0,
+
+    @Column(nullable = false, unique = true, length = 64)
+    val login: String = "",
+
+    @Column(nullable = false, length = 128)
+    val password: String = "",
+
+    @Column(nullable = false, length = 64)
+    val firstname: String = "",
+
+    @Column(nullable = false, length = 64)
+    val lastname: String = "",
+
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val tweets: MutableList<Tweet> = mutableListOf()
+)
