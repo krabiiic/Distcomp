@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -29,7 +30,7 @@ public class UserService {
     public UserResponseTo getById(Long id) {
         return userRepository.findById(id)
                 .map(this::toResponse)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
     }
 
     public UserResponseTo create(UserRequestTo request) {
@@ -40,20 +41,20 @@ public class UserService {
 
     public UserResponseTo update(UserRequestTo request) {
         if (request.getId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID must not be null for update");
+            throw new NoSuchElementException("User not found");
         }
 
         User existing = userRepository.findById(request.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
 
         modelMapper.map(request, existing);
-        User updated = userRepository.update(existing);
+        User updated = userRepository.save(existing);
         return toResponse(updated);
     }
 
     public void delete(Long id) {
         if (userRepository.findById(id).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            throw new NoSuchElementException("User not found");
         }
         userRepository.deleteById(id);
     }

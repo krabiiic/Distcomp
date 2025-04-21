@@ -3,6 +3,7 @@ package com.example.restservice.controller;
 import com.example.restservice.dto.request.ArticleRequestTo;
 import com.example.restservice.dto.response.ArticleResponseTo;
 import com.example.restservice.service.ArticleService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +28,14 @@ public class ArticleController {
     }
 
     @PostMapping
-    public ResponseEntity<ArticleResponseTo> create(@RequestBody ArticleRequestTo request) {
+    public ResponseEntity<ArticleResponseTo> create(@RequestBody @Valid ArticleRequestTo request) {
       return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(articleService.create(request));
     }
 
     @PutMapping
-    public ResponseEntity<ArticleResponseTo> update(@RequestBody ArticleRequestTo request) {
+    public ResponseEntity<ArticleResponseTo> update(@RequestBody @Valid ArticleRequestTo request) {
         return ResponseEntity.ok(articleService.update(request));
     }
 

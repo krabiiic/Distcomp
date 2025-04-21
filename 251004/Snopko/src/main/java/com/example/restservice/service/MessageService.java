@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -28,7 +29,7 @@ public class MessageService {
     public MessageResponseTo getById(Long id) {
         return messageRepository.findById(id)
                 .map(this::toResponse)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+                .orElseThrow(() -> new NoSuchElementException("Message not found"));
     }
 
     public MessageResponseTo create(MessageRequestTo request) {
@@ -39,20 +40,20 @@ public class MessageService {
 
     public MessageResponseTo update(MessageRequestTo request) {
         if (request.getId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message ID must not be null for update");
+            throw new NoSuchElementException("Message not found");
         }
 
         Message existing = messageRepository.findById(request.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+                .orElseThrow(() -> new NoSuchElementException("Message not found"));
 
         modelMapper.map(request, existing);
-        Message updated = messageRepository.update(existing);
+        Message updated = messageRepository.save(existing);
         return toResponse(updated);
     }
 
     public void delete(Long id) {
         if (messageRepository.findById(id).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
+            throw new NoSuchElementException("Message not found");
         }
         messageRepository.deleteById(id);
     }

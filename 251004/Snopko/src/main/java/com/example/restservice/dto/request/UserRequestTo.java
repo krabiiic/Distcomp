@@ -14,10 +14,10 @@ public class UserRequestTo {
     @Size(min = 8, max = 128, message = "Password must be between 8 and 128 characters")
     private String password;
 
-    @Size(min = 0, max = 64, message = "First name must be less than 64 characters")
+    @Size(min = 2, max = 64, message = "First name must be less than 64 characters")
     private String firstname;
 
-    @Size(min = 0, max = 64, message = "Last name must be less than 64 characters")
+    @Size(min = 2, max = 64, message = "Last name must be less than 64 characters")
     private String lastname;
 
     private Long id;

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -28,7 +29,7 @@ public class MarkService {
     public MarkResponseTo getById(Long id) {
         return markRepository.findById(id)
                 .map(this::toResponse)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mark not found"));
+                .orElseThrow(() -> new NoSuchElementException("Mark not found"));
     }
 
     public MarkResponseTo create(MarkRequestTo request) {
@@ -39,20 +40,20 @@ public class MarkService {
 
     public MarkResponseTo update(MarkRequestTo request) {
         if (request.getId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mark ID must not be null for update");
+            throw new NoSuchElementException("Mark not found");
         }
 
         Mark existing = markRepository.findById(request.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mark not found"));
+                .orElseThrow(() -> new NoSuchElementException("Mark not found"));
 
         modelMapper.map(request, existing);
-        Mark updated = markRepository.update(existing);
+        Mark updated = markRepository.save(existing);
         return toResponse(updated);
     }
 
     public void delete(Long id) {
         if (markRepository.findById(id).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Mark not found");
+            throw new NoSuchElementException("Mark not found");
         }
         markRepository.deleteById(id);
     }

@@ -3,6 +3,7 @@ package com.example.restservice.controller;
 import com.example.restservice.dto.request.MessageRequestTo;
 import com.example.restservice.dto.response.MessageResponseTo;
 import com.example.restservice.service.MessageService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +28,14 @@ public class MessageController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponseTo> create(@RequestBody MessageRequestTo request) {
+    public ResponseEntity<MessageResponseTo> create(@RequestBody @Valid MessageRequestTo request) {
       return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(messageService.create(request));
     }
 
     @PutMapping
-    public ResponseEntity<MessageResponseTo> update(@RequestBody MessageRequestTo request) {
+    public ResponseEntity<MessageResponseTo> update(@RequestBody @Valid MessageRequestTo request) {
         return ResponseEntity.ok(messageService.update(request));
     }
 

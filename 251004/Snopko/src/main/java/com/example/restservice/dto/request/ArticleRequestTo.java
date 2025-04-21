@@ -1,10 +1,13 @@
 package com.example.restservice.dto.request;
 
+import com.example.restservice.model.Mark;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class ArticleRequestTo {
@@ -16,13 +19,12 @@ public class ArticleRequestTo {
     @Size(min = 4, max = 2048, message = "Content must be between 4 and 2048 characters")
     private String content;
 
-    @NotBlank(message = "Created time cannot be blank")
-    private LocalDateTime created;
 
-    @NotBlank(message = "Created time cannot be blank")
+    private LocalDateTime created;
     private LocalDateTime modified;
 
     private Long id;
     private Long userId;
 
+    private List<String> marks = new ArrayList<>();
 }

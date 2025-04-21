@@ -4,6 +4,7 @@ import com.example.restservice.dto.request.UserRequestTo;
 import com.example.restservice.dto.response.UserResponseTo;
 import com.example.restservice.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,14 +29,14 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseTo> create(@RequestBody UserRequestTo request) {
+    public ResponseEntity<UserResponseTo> create(@RequestBody @Valid UserRequestTo request) {
       return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(userService.create(request));
     }
 
     @PutMapping
-    public ResponseEntity<UserResponseTo> update(@RequestBody UserRequestTo request) {
+    public ResponseEntity<UserResponseTo> update(@RequestBody @Valid UserRequestTo request) {
         return ResponseEntity.ok(userService.update(request));
     }
 
