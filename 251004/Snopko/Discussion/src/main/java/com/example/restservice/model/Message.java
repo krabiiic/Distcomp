@@ -1,5 +1,7 @@
 package com.example.restservice.model;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Data;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
@@ -19,4 +21,12 @@ public class Message{
 
     @Column
     private String content;
+
+    @Enumerated(EnumType.STRING)
+    private MessageState state = MessageState.PENDING;
+
+    public enum MessageState {
+        PENDING, APPROVE, DECLINE
+    }
 }
+

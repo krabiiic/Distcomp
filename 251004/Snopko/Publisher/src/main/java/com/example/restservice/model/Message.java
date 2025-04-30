@@ -2,8 +2,6 @@ package com.example.restservice.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Table(name = "tbl_message")
@@ -19,4 +17,11 @@ public class Message implements Identifiable {
 
     @Column(length = 2048)
     private String content;
+
+    @Enumerated(EnumType.STRING)
+    private MessageState state = MessageState.PENDING;
+
+    public enum MessageState {
+        PENDING, APPROVE, DECLINE
+    }
 }

@@ -6,9 +6,8 @@ import com.example.restservice.model.Message;
 import com.example.restservice.repository.MessageRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -19,6 +18,14 @@ import java.util.stream.Collectors;
 public class MessageService {
     private final MessageRepository messageRepository;
     private final ModelMapper modelMapper;
+
+    @Transactional
+    public void updateState(Long messageId, Message.MessageState newState) {
+        Message message = messageRepository.findById(messageId.toString())
+                .orElseThrow(() -> new NoSuchElementException(messageId.toString()));
+        message.setState(newState);
+        messageRepository.save(message);
+    }
 
     public List<MessageResponseTo> getAll() {
         return messageRepository.findAll().stream()
@@ -35,7 +42,6 @@ public class MessageService {
     public MessageResponseTo create(MessageRequestTo request) {
         Message message = modelMapper.map(request, Message.class);
         Message saved = messageRepository.save(message);
-        Message temp = saved;
         return toResponse(saved);
     }
 
