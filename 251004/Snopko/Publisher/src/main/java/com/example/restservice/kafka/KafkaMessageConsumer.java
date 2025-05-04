@@ -10,12 +10,18 @@ import java.util.NoSuchElementException;
 
 @Service
 public class KafkaMessageConsumer {
-    MessageRepository messageRepository;
-
+    private final MessageRepository messageRepository;
+    public KafkaMessageConsumer(MessageRepository messageRepository) {
+        this.messageRepository = messageRepository;
+    }
     @KafkaListener(topics = "OutTopic", groupId = "discussion-group", containerFactory = "kafkaListenerContainerFactory")
     public void listen(MessageEvent message) {
-        Message existing = messageRepository.findById(message.getId()).orElseThrow(() -> new NoSuchElementException("Message not found"));;
-        existing.setState(message.getState());
-        messageRepository.save(existing);
+        try {
+            Message existing = messageRepository.findById(message.getId()).orElseThrow(() -> new NoSuchElementException("Message not found"));
+            existing.setState(message.getState());
+            messageRepository.save(existing);
+        } catch (Exception _) {
+
+        }
     }
 }
