@@ -1,0 +1,28 @@
+[project]
+name = "labs-distributed-computing"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "amy1181996",email = "amy1181996@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13, <4.0"
+dependencies = [
+    "django (>=5.1.6,<6.0.0)",
+    "djangorestframework (>=3.15.2,<4.0.0)",
+    "psycopg2-binary (>=2.9.10,<3.0.0)",
+    "isort (>=6.0.1,<7.0.0)",
+    "ruff (>=0.9.9,<0.10.0)",
+    "drf-spectacular[sidecar] (>=0.28.0,<0.29.0)",
+    "django-cassandra-engine (>=1.9.0,<2.0.0)",
+    "django-redis (>=5.4.0,<6.0.0)",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.1.0"
+
