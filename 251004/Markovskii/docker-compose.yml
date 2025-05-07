@@ -1,0 +1,131 @@
+﻿name: 'rv'
+services:
+  news_service:
+    image: news_service
+    build:
+      context: ./NewsService/
+      dockerfile: ./Dockerfile
+    ports:
+      - 24110:24110
+    environment:
+      ConnectionStrings__npg: "User ID=postgres;Host=db;Password=postgres;Port=5432;Database=distcomp;Pooling=true;"
+      DiscussionSettings__DiscussionUrl: "http://discussion_service:24130"
+      ASPNETCORE_URLS: "http://0.0.0.0:24110"
+      Kafka__BootstrapServer: "kafka:9092"
+      Kafka__PostEventsTopic: "InTopic"
+      Kafka__PostResponsesTopic: "OutTopic"
+      Kafka__GroupId: "publisher_response_group"
+      ConnectionStrings__redis: "rediska:6379"
+
+    restart: unless-stopped
+
+    depends_on:
+      db:
+        condition: service_healthy
+      init-kafka:
+        condition: service_completed_successfully
+
+  discussion_service:
+    image: discussion_service
+    build:
+      context: ./DiscussionService/
+      dockerfile: ./Dockerfile
+    ports:
+      - 24130:24130
+    environment:
+      PostDatabase__MongoConnectionString: "mongodb://mango:27017"
+      PostDatabase__DatabaseName: "PostStore"
+      PostDatabase__PostCollectionName: "Post"
+      ASPNETCORE_URLS: "http://0.0.0.0:24130"
+      Kafka__BootstrapServer: "kafka:9092"
+      Kafka__PostEventsTopic: "InTopic"
+      Kafka__PostResponsesTopic: "OutTopic"
+      Kafka__GroupId: "discussion_request_group"
+
+    restart: unless-stopped
+
+    depends_on:
+      mango:
+        condition: service_healthy
+      init-kafka:
+        condition: service_completed_successfully
+        
+  db:
+    image: postgres:16.0-alpine
+    container_name: db
+    restart: unless-stopped
+
+    environment:
+      PGPORT: 5432
+      POSTGRES_DB: distcomp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - 5432:5432
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+      
+  mango:
+    image: mongo
+    container_name: mango
+    ports:
+      - 9042:27017
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+      
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - 9092:9092
+
+
+  init-kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - kafka
+    entrypoint: [ '/bin/sh', '-c' ]
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server kafka:9092 --list
+
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic order_events --replication-factor 1 --partitions 3
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic InTopic --replication-factor 1 --partitions 3
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic OutTopic --replication-factor 1 --partitions 3
+
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server kafka:9092 --list
+      "
+
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181 
+      ZOOKEEPER_TICK_TIME: 2000 
+    ports:
+      - 2181:2181
+      
+  rediska:
+    image: redis
+    restart: always
+    container_name: rediska
+    ports:
+      - 6379:6379

@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changeset/create-note-table.yaml
+  - include:
+      file: db/changelog/changeset/create-editor-table.yaml
+  - include:
+      file: db/changelog/changeset/create-issue-table.yaml
+  - include:
+      file: db/changelog/changeset/create-mark-table.yaml
+  - include:
+      file: db/changelog/changeset/create-issue-mark-table.yaml

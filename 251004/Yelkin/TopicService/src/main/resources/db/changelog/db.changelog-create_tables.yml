@@ -1,0 +1,189 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-topic-table
+      author: Matthew.Yelkin
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: tbl_topic
+      changes:
+        - createTable:
+            tableName: tbl_topic
+            remarks: Тема
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: topic_pkey
+                  name: id
+                  type: BIGINT
+              - column:
+                  remarks: "Название"
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  remarks: "Содержание"
+                  name: content
+                  type: VARCHAR(255)
+              - column:
+                  remarks: "Ссылка на создателя"
+                  name: creator_id
+                  type: BIGINT
+              - column:
+                  remarks: "Дата создания"
+                  name: created
+                  type: TIMESTAMP(6)
+              - column:
+                  remarks: "Дата обновления"
+                  name: modified
+                  type: TIMESTAMP(6)
+  - changeSet:
+      id: create-creator-table
+      author: Matthew.Yelkin
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: tbl_creator
+      changes:
+        - createTable:
+            tableName: tbl_creator
+            remarks: Создатель
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: creator_pkey
+                  name: id
+                  type: BIGINT
+              - column:
+                  remarks: "Логин"
+                  name: login
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  remarks: "Пароль"
+                  name: password
+                  type: VARCHAR(128)
+                  constraints:
+                    nullable: false
+              - column:
+                  remarks: "Имя"
+                  name: firstname
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  remarks: "Фамилия"
+                  name: lastname
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  remarks: "Дата создания"
+                  name: created
+                  type: TIMESTAMP(6)
+              - column:
+                  remarks: "Дата обновления"
+                  name: modified
+                  type: TIMESTAMP(6)
+  - changeSet:
+      id: create-comment-table
+      author: Matthew.Yelkin
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: tbl_comment
+      changes:
+        - createTable:
+            tableName: tbl_comment
+            remarks: Комментарии
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: comment_pkey
+                  name: id
+                  type: BIGINT
+              - column:
+                  remarks: "Содержание"
+                  name: content
+                  type: VARCHAR(2048)
+              - column:
+                  remarks: "Ссылка на тему"
+                  name: topic_id
+                  type: BIGINT
+              - column:
+                  remarks: "Дата создания"
+                  name: created
+                  type: TIMESTAMP(6)
+              - column:
+                  remarks: "Дата обновления"
+                  name: modified
+                  type: TIMESTAMP(6)
+  - changeSet:
+      id: create-mark-table
+      author: Matthew.Yelkin
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: tbl_mark
+      changes:
+        - createTable:
+            tableName: tbl_mark
+            remarks: Оценки
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: mark_pkey
+                  name: id
+                  type: BIGINT
+              - column:
+                  remarks: "Название"
+                  name: name
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  remarks: "Дата создания"
+                  name: created
+                  type: TIMESTAMP(6)
+              - column:
+                  remarks: "Дата обновления"
+                  name: modified
+                  type: TIMESTAMP(6)
+  - changeSet:
+      id: create-m2m_topic_mark
+      author: Matthew.Yelkin
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: tbl_m2m_topic_mark
+      changes:
+        - createTable:
+            tableName: tbl_m2m_topic_mark
+            remarks: Тема оценка
+            columns:
+              - column:
+                  remarks: "Ссылка на тему"
+                  name: topic_id
+                  type: BIGINT
+              - column:
+                  remarks: "Ссылка на оценку"
+                  name: mark_id
+                  type: BIGINT

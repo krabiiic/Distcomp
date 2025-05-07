@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    volumes:
+      - ./migrator/migrations:/migrations
+    environment:
+      - DATABASE_URL=postgres://postgres:1234@postgres:5432/postgres?sslmode=disable
+    command: migrate -database postgres://postgres:1234@postgres:5432/postgres?sslmode=disable -path /migrations up
+    depends_on:
+      postgres:
+        condition: service_healthy
+  
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: 1234
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
+
+volumes:
+  postgres_data:

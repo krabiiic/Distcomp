@@ -1,0 +1,9 @@
+server:
+  port: 24130
+
+spring:
+  application:
+    name: module-discussion
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/distcomp

@@ -1,0 +1,27 @@
+services:
+  distcomp:
+    image: distcomp
+    build:
+      context: .
+      dockerfile: DistComp/Dockerfile
+    ports:
+      - 24110:8080
+      - 24111:8081
+    networks:
+      - kafkanet
+  discussion:
+    image: discussion
+    build:
+      context: .
+      dockerfile: Discussion/Dockerfile
+    ports:
+      - 24130:8080
+      - 24131:8081
+    networks:
+      - kafkanet
+
+networks:
+  kafkanet:
+    external:
+      name: kafkanet
+    

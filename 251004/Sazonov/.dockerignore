@@ -1,0 +1,15 @@
+# git, binaries, dockerfiles
+.git*
+bin/
+Dockerfile
+
+# out files (e.g. coverage)
+*.out
+
+# test and docs dir
+./tests
+./docs
+
+# terraform
+main.tf
+*terraform*

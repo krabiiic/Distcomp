@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog">
+
+    <!-- Создание таблицы tbl_writer -->
+    <changeSet id="1" author="yourname">
+        <createTable tableName="tbl_writer">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="login" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="firstname" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lastname" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Создание таблицы tbl_news -->
+    <changeSet id="2" author="yourname">
+        <createTable tableName="tbl_news">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="writer_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="tbl_news"
+                baseColumnNames="writer_id"
+                constraintName="fk_news_writer"
+                referencedTableName="tbl_writer"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <!-- Создание таблицы tbl_marker -->
+    <changeSet id="3" author="yourname">
+        <createTable tableName="tbl_marker">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Создание таблицы tbl_note -->
+    <changeSet id="4" author="yourname">
+        <createTable tableName="tbl_note">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="news_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="tbl_note"
+                baseColumnNames="news_id"
+                constraintName="fk_note_news"
+                referencedTableName="tbl_news"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <!-- Создание таблицы tbl_news_marker (связь многие-ко-многим) -->
+    <changeSet id="5" author="yourname">
+        <createTable tableName="tbl_news_marker">
+            <column name="news_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="marker_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="tbl_news_marker" columnNames="news_id, marker_id"/>
+        <addForeignKeyConstraint
+                baseTableName="tbl_news_marker"
+                baseColumnNames="news_id"
+                constraintName="fk_news_marker_news"
+                referencedTableName="tbl_news"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="tbl_news_marker"
+                baseColumnNames="marker_id"
+                constraintName="fk_news_marker_marker"
+                referencedTableName="tbl_marker"
+                referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

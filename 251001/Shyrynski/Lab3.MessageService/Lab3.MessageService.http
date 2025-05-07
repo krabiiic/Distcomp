@@ -1,0 +1,6 @@
+@Lab3.MessageService_HostAddress = http://localhost:5101
+
+GET {{Lab3.MessageService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

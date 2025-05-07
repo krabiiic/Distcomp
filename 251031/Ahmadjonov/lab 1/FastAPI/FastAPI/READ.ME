@@ -1,0 +1,178 @@
+ uvicorn app.main:app --host 127.0.0.1 --port 24110
+ uvicorn app.main:app --host 127.0.0.1 --port 24110 --reload
+ДЛЯ ЗАПУСКА ПРОЕКТА
+http://127.0.0.1:24110/docs
+ПОРТ
+fast api code main.py
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List
+
+app = FastAPI()
+
+# --- Модели данных ---
+
+class User(BaseModel):
+    login: str
+    password: str
+    firstname: str
+    lastname: str
+
+class UserInDB(User):
+    id: int
+
+class News(BaseModel):
+    userId: int
+    title: str
+    content: str
+
+class NewsInDB(News):
+    id: int
+
+class Reaction(BaseModel):
+    newsId: int
+    content: str
+
+class ReactionInDB(Reaction):
+    id: int
+
+class Tag(BaseModel):
+    name: str
+
+class TagInDB(Tag):
+    id: int
+
+# --- Временные базы данных ---
+fake_users_db = {}
+fake_news_db = {}
+fake_reactions_db = {}
+fake_tags_db = {}
+
+current_user_id = 1
+current_news_id = 1
+current_reaction_id = 1
+current_tag_id = 1
+
+# --- Работа с пользователями ---
+
+@app.post("/api/v1.0/users", response_model=UserInDB, status_code=201)
+def create_user(user: User):
+    global current_user_id
+    fake_users_db[current_user_id] = user
+    created_user = UserInDB(id=current_user_id, **user.dict())
+    current_user_id += 1
+    return created_user
+
+@app.get("/api/v1.0/users", response_model=List[UserInDB])
+def get_users():
+    return [UserInDB(id=user_id, **user.dict()) for user_id, user in fake_users_db.items()]
+
+@app.get("/api/v1.0/users/{user_id}", response_model=UserInDB)
+def get_user(user_id: int):
+    user = fake_users_db.get(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return UserInDB(id=user_id, **user.dict())
+
+@app.delete("/api/v1.0/users/{user_id}", status_code=204)
+def delete_user(user_id: int):
+    if user_id not in fake_users_db:
+        raise HTTPException(status_code=404, detail="User not found")
+    del fake_users_db[user_id]
+
+# --- Работа с новостями ---
+
+@app.post("/api/v1.0/news", response_model=NewsInDB, status_code=201)
+def create_news(news: News):
+    global current_news_id
+    fake_news_db[current_news_id] = news
+    created_news = NewsInDB(id=current_news_id, **news.dict())
+    current_news_id += 1
+    return created_news
+
+@app.get("/api/v1.0/news", response_model=List[NewsInDB])
+def get_all_news():
+    return [NewsInDB(id=news_id, **news.dict()) for news_id, news in fake_news_db.items()]
+
+@app.get("/api/v1.0/news/{news_id}", response_model=NewsInDB)
+def get_news(news_id: int):
+    news = fake_news_db.get(news_id)
+    if not news:
+        raise HTTPException(status_code=404, detail="News not found")
+    return NewsInDB(id=news_id, **news.dict())
+
+@app.delete("/api/v1.0/news/{news_id}", status_code=204)
+def delete_news(news_id: int):
+    if news_id not in fake_news_db:
+        raise HTTPException(status_code=404, detail="News not found")
+    del fake_news_db[news_id]
+
+# --- Работа с реакциями ---
+
+@app.get("/api/v1.0/reactions", response_model=List[ReactionInDB])
+def get_all_reactions():
+    return [ReactionInDB(id=reaction_id, **reaction.dict()) for reaction_id, reaction in fake_reactions_db.items()]
+
+@app.post("/api/v1.0/reactions", response_model=ReactionInDB, status_code=201)
+def create_reaction(reaction: Reaction):
+    global current_reaction_id
+    if reaction.newsId not in fake_news_db:
+        raise HTTPException(status_code=404, detail="News not found")
+    fake_reactions_db[current_reaction_id] = reaction
+    created_reaction = ReactionInDB(id=current_reaction_id, **reaction.dict())
+    current_reaction_id += 1
+    return created_reaction
+
+@app.get("/api/v1.0/reactions/{reaction_id}", response_model=ReactionInDB)
+def get_reaction(reaction_id: int):
+    reaction = fake_reactions_db.get(reaction_id)
+    if not reaction:
+        raise HTTPException(status_code=404, detail="Reaction not found")
+    return ReactionInDB(id=reaction_id, **reaction.dict())
+
+@app.put("/api/v1.0/reactions", response_model=ReactionInDB)
+def update_reaction(updated_reaction: ReactionInDB):
+    if updated_reaction.id not in fake_reactions_db:
+        raise HTTPException(status_code=404, detail="Reaction not found")
+    fake_reactions_db[updated_reaction.id] = updated_reaction
+    return updated_reaction
+
+@app.delete("/api/v1.0/reactions/{reaction_id}", status_code=204)
+def delete_reaction(reaction_id: int):
+    if reaction_id not in fake_reactions_db:
+        raise HTTPException(status_code=404, detail="Reaction not found")
+    del fake_reactions_db[reaction_id]
+
+# --- Работа с тегами ---
+
+@app.get("/api/v1.0/tags", response_model=List[TagInDB])
+def get_all_tags():
+    return [TagInDB(id=tag_id, **tag.dict()) for tag_id, tag in fake_tags_db.items()]
+
+@app.post("/api/v1.0/tags", response_model=TagInDB, status_code=201)
+def create_tag(tag: Tag):
+    global current_tag_id
+    fake_tags_db[current_tag_id] = tag
+    created_tag = TagInDB(id=current_tag_id, **tag.dict())
+    current_tag_id += 1
+    return created_tag
+
+@app.get("/api/v1.0/tags/{tag_id}", response_model=TagInDB)
+def get_tag(tag_id: int):
+    tag = fake_tags_db.get(tag_id)
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    return TagInDB(id=tag_id, **tag.dict())
+
+@app.put("/api/v1.0/tags", response_model=TagInDB)
+def update_tag(updated_tag: TagInDB):
+    if updated_tag.id not in fake_tags_db:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    fake_tags_db[updated_tag.id] = updated_tag
+    return updated_tag
+
+@app.delete("/api/v1.0/tags/{tag_id}", status_code=204)
+def delete_tag(tag_id: int):
+    if tag_id not in fake_tags_db:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    del fake_tags_db[tag_id]
