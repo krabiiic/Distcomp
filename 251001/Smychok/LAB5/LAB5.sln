@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LAB5", "LAB5\LAB5.csproj", "{EBD4CB36-B3D1-455E-AD61-5B3AC9B65221}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CassandraPosts", "CassandraPosts\CassandraPosts.csproj", "{4318C242-55FB-4C52-B7DC-CD1142490A5F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EBD4CB36-B3D1-455E-AD61-5B3AC9B65221}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBD4CB36-B3D1-455E-AD61-5B3AC9B65221}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBD4CB36-B3D1-455E-AD61-5B3AC9B65221}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBD4CB36-B3D1-455E-AD61-5B3AC9B65221}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4318C242-55FB-4C52-B7DC-CD1142490A5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4318C242-55FB-4C52-B7DC-CD1142490A5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4318C242-55FB-4C52-B7DC-CD1142490A5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4318C242-55FB-4C52-B7DC-CD1142490A5F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
