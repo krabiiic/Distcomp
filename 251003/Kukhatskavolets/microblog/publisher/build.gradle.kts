@@ -31,6 +31,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql:42.7.2")
     testRuntimeOnly("com.h2database:h2:2.2.224")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.springframework.kafka:spring-kafka")
 }
 
 kotlin {

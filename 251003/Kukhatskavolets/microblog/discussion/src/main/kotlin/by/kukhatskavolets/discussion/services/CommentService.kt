@@ -6,6 +6,7 @@ import by.kukhatskavolets.discussion.entities.CommentKey
 import by.kukhatskavolets.discussion.mappers.toEntity
 import by.kukhatskavolets.discussion.mappers.toResponse
 import by.kukhatskavolets.discussion.repositories.CommentRepository
+import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 
 @Service
@@ -42,4 +43,20 @@ class CommentService(private val commentRepository: CommentRepository) {
         }
         commentRepository.deleteById(commentKey)
     }
+
+    @KafkaListener(topics = ["comment-create"], groupId = "discussion-group")
+    fun listenToCommentCreate(commentRequestTo: CommentRequestTo) {
+        createComment(commentRequestTo, "Belarus")
+    }
+
+    @KafkaListener(topics = ["comment-update"], groupId = "discussion-group")
+    fun listenToCommentUpdate(commentRequestTo: CommentRequestTo) {
+        updateComment("Belarus", commentRequestTo)
+    }
+
+    @KafkaListener(topics = ["comment-delete"], groupId = "discussion-group")
+    fun listenToCommentDelete(id: Long) {
+        deleteComment("Belarus", id)
+    }
+
 }
