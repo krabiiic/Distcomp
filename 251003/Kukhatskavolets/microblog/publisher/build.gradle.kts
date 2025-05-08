@@ -32,6 +32,8 @@ dependencies {
     testRuntimeOnly("com.h2database:h2:2.2.224")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.boot:spring-boot-starter-cache")
 }
 
 kotlin {

@@ -6,6 +6,10 @@ import by.kukhatskavolets.publisher.mappers.toEntity
 import by.kukhatskavolets.publisher.mappers.toResponse
 import by.kukhatskavolets.publisher.repositories.CommentRepository
 import by.kukhatskavolets.publisher.repositories.TweetRepository
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
@@ -15,6 +19,12 @@ class CommentService(
     private val tweetRepository: TweetRepository,
     private val kafkaTemplate: KafkaTemplate<String, Any>
 ) {
+    @Caching(
+        evict = [
+            CacheEvict(value = ["comments"], key = "'all_comments'"),
+            CacheEvict(value = ["commentsByTweet"], key = "#commentRequestTo.tweetId")
+        ]
+    )
     fun createComment(commentRequestTo: CommentRequestTo): CommentResponseTo {
         val tweet = tweetRepository.findById(commentRequestTo.tweetId).orElseThrow { NoSuchElementException() }
         val comment = commentRequestTo.toEntity(tweet)
@@ -24,14 +34,23 @@ class CommentService(
         return commentResponse
     }
 
+    @Cacheable(value = ["comments"], key = "#id")
     fun getCommentById(id: Long): CommentResponseTo {
         val comment = commentRepository.findById(id).orElseThrow { NoSuchElementException() }
         return comment.toResponse()
     }
 
+    @Cacheable(value = ["comments"], key = "'all_comments'")
     fun getAllComments(): List<CommentResponseTo> =
         commentRepository.findAll().map { it.toResponse() }
 
+    @Caching(
+        put = [CachePut(value = ["comments"], key = "#id")],
+        evict = [
+            CacheEvict(value = ["comments"], key = "'all_comments'"),
+            CacheEvict(value = ["commentsByTweet"], key = "#commentRequestTo.tweetId")
+        ]
+    )
     fun updateComment(id: Long, commentRequestTo: CommentRequestTo): CommentResponseTo {
         val tweet = tweetRepository.findById(commentRequestTo.tweetId).orElseThrow { NoSuchElementException() }
         val updatedComment = commentRequestTo.toEntity(tweet).apply { this.id = id }
@@ -40,12 +59,20 @@ class CommentService(
         return commentResponse
     }
 
+    @Caching(
+        evict = [
+            CacheEvict(value = ["comments"], key = "#id"),
+            CacheEvict(value = ["comments"], key = "'all_comments'"),
+            CacheEvict(value = ["commentsByTweet"], allEntries = true)
+        ]
+    )
     fun deleteComment(id: Long) {
         commentRepository.findById(id).orElseThrow { NoSuchElementException() }
         commentRepository.deleteById(id)
         sendCommentDeletedEvent(id)
     }
 
+    @Cacheable(value = ["commentsByTweet"], key = "#tweetId")
     fun getCommentsByTweetId(tweetId: Long): List<CommentResponseTo> {
         val tweet = tweetRepository.findById(tweetId).orElseThrow { NoSuchElementException() }
         return tweet.comments.map { it.toResponse() }

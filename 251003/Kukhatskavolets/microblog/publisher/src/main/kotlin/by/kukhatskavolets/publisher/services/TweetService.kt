@@ -10,6 +10,10 @@ import by.kukhatskavolets.publisher.mappers.toResponse
 import by.kukhatskavolets.publisher.repositories.TweetRepository
 import by.kukhatskavolets.publisher.repositories.UserRepository
 import jakarta.persistence.criteria.Predicate
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -19,6 +23,11 @@ class TweetService(
     private val tweetRepository: TweetRepository,
     private val userRepository: UserRepository,
 ) {
+    @Caching(
+        evict = [
+            CacheEvict(value = ["tweets"], key = "'all_tweets'"),
+        ]
+    )
     fun createTweet(tweetRequestTo: TweetRequestTo): TweetResponseTo {
         val user = userRepository.findById(tweetRequestTo.userId).orElseThrow { NoSuchElementException() }
         val marks = tweetRequestTo.marks.map { Mark(name = it) }.toMutableSet()
@@ -27,14 +36,20 @@ class TweetService(
         return savedTweet.toResponse()
     }
 
+    @Cacheable(value = ["tweets"], key = "#id")
     fun getTweetById(id: Long): TweetResponseTo {
         val tweet = tweetRepository.findById(id).orElseThrow { NoSuchElementException() }
         return tweet.toResponse()
     }
 
+    @Cacheable(value = ["tweets"], key = "'all_tweets'")
     fun getAllTweets(): List<TweetResponseTo> =
         tweetRepository.findAll().map { it.toResponse() }
 
+    @Caching(
+        put = [CachePut(value = ["tweets"], key = "#id")],
+        evict = [CacheEvict(value = ["tweets"], key = "'all_tweets'")]
+    )
     fun updateTweet(id: Long, tweetRequestTo: TweetRequestTo): TweetResponseTo {
         val user = userRepository.findById(tweetRequestTo.userId).orElseThrow { NoSuchElementException() }
         val marks = tweetRequestTo.marks.map { Mark(name = it) }.toMutableSet()
@@ -45,6 +60,12 @@ class TweetService(
         return tweetRepository.save(updatedTweet).toResponse()
     }
 
+    @Caching(
+        evict = [
+            CacheEvict(value = ["tweets"], key = "#id"),
+            CacheEvict(value = ["tweets"], key = "'all_tweets'")
+        ]
+    )
     fun deleteTweet(id: Long) {
         tweetRepository.findById(id).orElseThrow { NoSuchElementException() }
         tweetRepository.deleteById(id)
