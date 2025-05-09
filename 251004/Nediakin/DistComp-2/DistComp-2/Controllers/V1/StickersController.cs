@@ -1,8 +1,8 @@
-﻿using DistComp_1.DTO.RequestDTO;
-using DistComp_1.Services.Interfaces;
+﻿using DistComp.DTO.RequestDTO;
+using DistComp.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DistComp_1.Controllers.V1;
+namespace DistComp.Controllers.V1;
 
 [ApiController]
 [Route("api/v1.0/[controller]")]

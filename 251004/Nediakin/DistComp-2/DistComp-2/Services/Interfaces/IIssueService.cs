@@ -1,7 +1,7 @@
-﻿using DistComp_1.DTO.RequestDTO;
-using DistComp_1.DTO.ResponseDTO;
+﻿using DistComp.DTO.RequestDTO;
+using DistComp.DTO.ResponseDTO;
 
-namespace DistComp_1.Services.Interfaces;
+namespace DistComp.Services.Interfaces;
 
 public interface IIssueService
 {

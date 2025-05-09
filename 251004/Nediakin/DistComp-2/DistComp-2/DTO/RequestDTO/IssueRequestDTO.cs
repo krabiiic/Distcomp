@@ -1,4 +1,4 @@
-﻿namespace DistComp_1.DTO.RequestDTO;
+﻿namespace DistComp.DTO.RequestDTO;
 
 public class IssueRequestDTO
 {

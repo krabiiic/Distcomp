@@ -1,7 +1,8 @@
-using DistComp_1.Extensions;
-using DistComp_1.Infrastructure.Mapper;
-using DistComp_1.Infrastructure.Validators;
-using DistComp_1.Middleware;
+using System.Text.Json.Serialization;
+using DistComp.Extensions;
+using DistComp.Infrastructure.Mapper;
+using DistComp.Infrastructure.Validators;
+using DistComp.Middleware;
 using FluentValidation;
 using Scalar.AspNetCore;
 
@@ -9,19 +10,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 
 // Infrastructure
 builder.Services.AddAutoMapper(typeof(MappingProfile));
-// Регистрируем все валидаторы из сборки (текущей), где находится IssueRequestDTOValidator
+// Регистрируем все валидаторы из сборки (текущей), где находится StoryRequestDTOValidator
 // Scoped lifetime
 builder.Services.AddValidatorsFromAssemblyContaining<CreatorRequestDTOValidator>();
 
 builder.Services.AddRepositories();
 builder.Services.AddServices();
+builder.Services.AddDbContext(builder.Configuration);
 
 var app = builder.Build();
 

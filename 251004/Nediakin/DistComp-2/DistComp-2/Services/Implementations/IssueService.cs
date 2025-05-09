@@ -1,27 +1,29 @@
 ﻿using AutoMapper;
-using DistComp_1.DTO.RequestDTO;
-using DistComp_1.DTO.ResponseDTO;
-using DistComp_1.Exceptions;
-using DistComp_1.Infrastructure.Validators;
-using DistComp_1.Models;
-using DistComp_1.Repositories.Interfaces;
-using DistComp_1.Services.Interfaces;
+using DistComp.DTO.RequestDTO;
+using DistComp.DTO.ResponseDTO;
+using DistComp.Exceptions;
+using DistComp.Infrastructure.Validators;
+using DistComp.Models;
+using DistComp.Repositories.Interfaces;
+using DistComp.Services.Interfaces;
 using FluentValidation;
 
-namespace DistComp_1.Services.Implementations;
+namespace DistComp.Services.Implementations;
 
 public class IssueService : IIssueService
 {
     private readonly IIssueRepository _issueRepository;
     private readonly IMapper _mapper;
     private readonly IssueRequestDTOValidator _validator;
+    private readonly ICreatorRepository _creatorRepository;
 
     public IssueService(IIssueRepository issueRepository,
-        IMapper mapper, IssueRequestDTOValidator validator)
+        IMapper mapper, IssueRequestDTOValidator validator, ICreatorRepository creatorRepository)
     {
         _issueRepository = issueRepository;
         _mapper = mapper;
         _validator = validator;
+        _creatorRepository = creatorRepository;
     }
     
     public async Task<IEnumerable<IssueResponseDTO>> GetIssuesAsync()
@@ -41,9 +43,19 @@ public class IssueService : IIssueService
     {
         await _validator.ValidateAndThrowAsync(issue);
         var issueToCreate = _mapper.Map<Issue>(issue);
+
+        if (issueToCreate == null || await _issueRepository.HasIssue(issueToCreate.Title))
+        {
+            throw new ConflictException(ErrorCodes.IssueAlreadyExists, ErrorMessages.IssueAlreadyExists(issue.Title));
+        }
+
+        if (! await _creatorRepository.HasUser(issueToCreate.CreatorId))
+        {
+            throw new ConflictException(ErrorCodes.CreatorNotFound, ErrorMessages.CreatorNotFoundMessage(issueToCreate.CreatorId));
+        }
         
-        issueToCreate.Created = DateTime.Now;
-        issueToCreate.Modified = DateTime.Now;
+        issueToCreate.Created = DateTime.UtcNow;
+        issueToCreate.Modified = DateTime.UtcNow;
         
         var createdIssue = await _issueRepository.CreateAsync(issueToCreate);
         return _mapper.Map<IssueResponseDTO>(createdIssue);
@@ -54,7 +66,7 @@ public class IssueService : IIssueService
         await _validator.ValidateAndThrowAsync(issue);
         var issueToUpdate = _mapper.Map<Issue>(issue);
         
-        issueToUpdate.Modified = DateTime.Now;
+        issueToUpdate.Modified = DateTime.UtcNow;
         
         var updatedIssue = await _issueRepository.UpdateAsync(issueToUpdate)
                            ?? throw new NotFoundException(ErrorCodes.IssueNotFound, ErrorMessages.IssueNotFoundMessage(issue.Id));
@@ -63,7 +75,7 @@ public class IssueService : IIssueService
 
     public async Task DeleteIssueAsync(long id)
     {
-        if (await _issueRepository.DeleteAsync(id) is null)
+        if (!await _issueRepository.DeleteAsync(id))
         {
             throw new NotFoundException(ErrorCodes.IssueNotFound, ErrorMessages.IssueNotFoundMessage(id));
         }

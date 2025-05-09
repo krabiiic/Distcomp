@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using DistComp_1.DTO.RequestDTO;
-using DistComp_1.DTO.ResponseDTO;
-using DistComp_1.Models;
+using DistComp.DTO.RequestDTO;
+using DistComp.DTO.ResponseDTO;
+using DistComp.Models;
 
-namespace DistComp_1.Infrastructure.Mapper;
+namespace DistComp.Infrastructure.Mapper;
 
 public class MappingProfile : Profile
 {

@@ -1,18 +1,20 @@
-﻿using DistComp_1.Repositories.Implementations;
-using DistComp_1.Repositories.Interfaces;
-using DistComp_1.Services.Implementations;
-using DistComp_1.Services.Interfaces;
+﻿using DistComp.Data;
+using DistComp.Repositories.Implementations;
+using DistComp.Repositories.Interfaces;
+using DistComp.Services.Implementations;
+using DistComp.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
-namespace DistComp_1.Extensions;
+namespace DistComp.Extensions;
 
 public static class ServiceExtensions
 {
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddSingleton<ICreatorRepository, InMemoryCreatorRepository>();
-        services.AddSingleton<IIssueRepository, InMemoryIssueRepository>();
-        services.AddSingleton<IStickerRepository, InMemoryStickerRepository>();
-        services.AddSingleton<INoteRepository, InMemoryNoteRepository>();
+        services.AddScoped<ICreatorRepository, DatabaseCreatorRepository>();
+        services.AddScoped<IIssueRepository, DatabaseIssueRepository>();
+        services.AddScoped<IStickerRepository, DatabaseStickerRepository>();
+        services.AddScoped<INoteRepository, DatabaseNoteRepository>();
 
         return services;
     }
@@ -24,6 +26,14 @@ public static class ServiceExtensions
         services.AddScoped<IStickerService, StickerService>();
         services.AddScoped<INoteService, NoteService>();
         
+        return services;
+    }
+    
+    public static IServiceCollection AddDbContext(this IServiceCollection services, IConfigurationManager config)
+    {
+        services.AddDbContext<AppDbContext>(options =>
+            options.UseNpgsql(config.GetConnectionString("PostgresConnection")));
+
         return services;
     }
 }

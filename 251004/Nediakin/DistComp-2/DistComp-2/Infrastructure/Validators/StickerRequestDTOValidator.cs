@@ -1,7 +1,7 @@
-﻿using DistComp_1.DTO.RequestDTO;
+﻿using DistComp.DTO.RequestDTO;
 using FluentValidation;
 
-namespace DistComp_1.Infrastructure.Validators;
+namespace DistComp.Infrastructure.Validators;
 
 public class StickerRequestDTOValidator : AbstractValidator<StickerRequestDTO>
 {

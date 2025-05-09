@@ -1,8 +1,9 @@
-﻿using DistComp_1.Models;
+﻿using DistComp.Models;
 
-namespace DistComp_1.Repositories.Interfaces;
+namespace DistComp.Repositories.Interfaces;
 
 public interface IIssueRepository : IRepository<Issue>
 {
-    
+    public Task<bool> HasIssue(string issue);
+    public Task<bool> HasIssue(long issueId);
 }

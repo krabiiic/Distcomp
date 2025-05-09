@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
-using DistComp_1.DTO.RequestDTO;
-using DistComp_1.DTO.ResponseDTO;
-using DistComp_1.Exceptions;
-using DistComp_1.Infrastructure.Validators;
-using DistComp_1.Models;
-using DistComp_1.Repositories.Interfaces;
-using DistComp_1.Services.Interfaces;
+using DistComp.DTO.RequestDTO;
+using DistComp.DTO.ResponseDTO;
+using DistComp.Exceptions;
+using DistComp.Infrastructure.Validators;
+using DistComp.Models;
+using DistComp.Repositories.Interfaces;
+using DistComp.Services.Interfaces;
 using FluentValidation;
 
-namespace DistComp_1.Services.Implementations;
+namespace DistComp.Services.Implementations;
 
 public class StickerService : IStickerService
 {
@@ -56,7 +56,7 @@ public class StickerService : IStickerService
 
     public async Task DeleteStickerAsync(long id)
     {
-        if (await _stickerRepository.DeleteAsync(id) is null)
+        if (!await _stickerRepository.DeleteAsync(id))
         {
             throw new NotFoundException(ErrorCodes.StickerNotFound, ErrorMessages.StickerNotFoundMessage(id));
         }

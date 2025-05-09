@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Net;
-using DistComp_1.Exceptions;
+using DistComp.Exceptions;
 
-namespace DistComp_1.Middleware;
+namespace DistComp.Middleware;
 
 public class GlobalExceptionMiddleware
 {
@@ -42,7 +42,7 @@ public class GlobalExceptionMiddleware
             }
             case ConflictException conflictException:
             {
-                context.Response.StatusCode = (int)HttpStatusCode.Conflict;
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 await context.Response.WriteAsJsonAsync(new
                 {
                     errorCode = conflictException.ErrorCode,

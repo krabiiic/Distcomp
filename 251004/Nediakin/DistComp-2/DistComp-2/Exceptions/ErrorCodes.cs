@@ -1,4 +1,4 @@
-﻿namespace DistComp_1.Exceptions;
+﻿namespace DistComp.Exceptions;
 
 public static class ErrorCodes
 {
@@ -6,9 +6,9 @@ public static class ErrorCodes
     public const int IssueNotFound = 40402;
     public const int StickerNotFound = 40403;
     public const int NoteNotFound = 40404;
-
-    public const int CreatorAlreadyExists = 40901;
-    public const int IssueAlreadyExists = 40902;
-    public const int StickerAlreadyExists = 40903;
-    public const int NoteAlreadyExists = 40904;
+    
+    public const int CreatorAlreadyExists = 403;
+    public const int IssueAlreadyExists = 403;
+    public const int StickerAlreadyExists = 403;
+    public const int NoteAlreadyExists = 403;
 }

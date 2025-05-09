@@ -1,4 +1,4 @@
-﻿namespace DistComp_1.Repositories.Interfaces;
+﻿namespace DistComp.Repositories.Interfaces;
 
 public interface IRepository<TEntity> where TEntity : class 
 {
@@ -10,5 +10,5 @@ public interface IRepository<TEntity> where TEntity : class
 
     Task<TEntity?> UpdateAsync(TEntity entity);
 
-    Task<TEntity?> DeleteAsync(long id);
+    Task<bool> DeleteAsync(long id);
 }

@@ -1,4 +1,4 @@
-﻿namespace DistComp_1.Exceptions;
+﻿namespace DistComp.Exceptions;
 
 public class NotFoundException : Exception
 {

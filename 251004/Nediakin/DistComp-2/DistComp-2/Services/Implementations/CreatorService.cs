@@ -1,15 +1,15 @@
 ﻿using AutoMapper;
-using DistComp_1.DTO.RequestDTO;
-using DistComp_1.DTO.ResponseDTO;
-using DistComp_1.Exceptions;
-using DistComp_1.Infrastructure.Validators;
-using DistComp_1.Models;
-using DistComp_1.Repositories.Interfaces;
-using DistComp_1.Services.Interfaces;
+using DistComp.DTO.RequestDTO;
+using DistComp.DTO.ResponseDTO;
+using DistComp.Exceptions;
+using DistComp.Infrastructure.Validators;
+using DistComp.Models;
+using DistComp.Repositories.Interfaces;
+using DistComp.Services.Interfaces;
 using FluentValidation;
 using ValidationException = System.ComponentModel.DataAnnotations.ValidationException;
 
-namespace DistComp_1.Services.Implementations;
+namespace DistComp.Services.Implementations;
 
 public class CreatorService : ICreatorService
 {
@@ -41,6 +41,10 @@ public class CreatorService : ICreatorService
     public async Task<CreatorResponseDTO> CreateCreatorAsync(CreatorRequestDTO creator)
     {
         await _validator.ValidateAndThrowAsync(creator);
+        if (await _creatorRepository.HasLogin(creator.Login))
+        {
+            throw new ConflictException(ErrorCodes.CreatorAlreadyExists, ErrorMessages.CreatorAlreadyExists(creator.Login));
+        }
         var creatorToCreate = _mapper.Map<Creator>(creator);
         var createdUser = await _creatorRepository.CreateAsync(creatorToCreate);
         return _mapper.Map<CreatorResponseDTO>(createdUser);
@@ -57,7 +61,7 @@ public class CreatorService : ICreatorService
 
     public async Task DeleteCreatorAsync(long id)
     {
-        if (await _creatorRepository.DeleteAsync(id) is null)
+        if (!await _creatorRepository.DeleteAsync(id))
         {
             throw new NotFoundException(ErrorCodes.CreatorNotFound, ErrorMessages.CreatorNotFoundMessage(id));
         }
