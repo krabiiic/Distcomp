@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-tbl_author" author="your_name">
+        <createTable tableName="tbl_author">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="login" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(255)"/>
+            <column name="lastname" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-tbl_issue" author="your_name">
+        <createTable tableName="tbl_issue">
+            <column name="id" type="int"  autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="authorId" type="int"/>
+            <column name="title" type="varchar(255)"/>
+            <column name="content" type="text"/>
+            <column name="created" type="timestamp">
+            </column>
+            <column name="modified" type="timestamp">
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-tbl_reaction" author="your_name">
+        <createTable tableName="tbl_reaction">
+            <column name="id" type="int"  autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="issueId" type="int">
+            </column>
+            <column name="content" type="text"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-tbl_label" author="your_name">
+        <createTable tableName="tbl_label">
+            <column name="id" type="int"  autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
