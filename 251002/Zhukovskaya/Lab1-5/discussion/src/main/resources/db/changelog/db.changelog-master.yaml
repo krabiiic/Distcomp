@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-counter-table
+      author: Rita
+      changes:
+        - sqlFile:
+            path: changeset/create-counter-table.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: create-message-table
+      author: Rita
+      changes:
+        - sqlFile:
+            path: changeset/create-message-table.sql
+            relativeToChangelogFile: true
