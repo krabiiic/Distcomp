@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.3" />
+    <PackageReference Include="MongoDB.Driver" Version="3.2.1" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.31" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lab3.Core\Lab3.Core.csproj" />
+  </ItemGroup>
+
+</Project>
