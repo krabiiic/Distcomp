@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Создание таблицы пользователей -->
+    <changeSet id="001" author="dev">
+        <createTable tableName="tbl_user">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="login" type="varchar(64)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="password" type="varchar(128)" />
+            <column name="firstname" type="varchar(64)" />
+            <column name="lastname" type="varchar(64)" />
+        </createTable>
+    </changeSet>
+
+    <!-- Создание таблицы задач (Issues) -->
+    <changeSet id="002" author="dev">
+        <createTable tableName="tbl_issue">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_issue_user" references="tbl_user(id)"/>
+            </column>
+            <column name="title" type="varchar(64)"/>
+            <column name="content" type="text"/>
+            <column name="created" type="timestamp"/>
+            <column name="modified" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Создание таблицы комментариев -->
+    <changeSet id="003" author="dev">
+        <createTable tableName="tbl_comment">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="issue_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_comment_issue" references="tbl_issue(id)"/>
+            </column>
+            <column name="content" type="text"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Создание таблицы меток (Labels) -->
+    <changeSet id="004" author="dev">
+        <createTable tableName="tbl_label">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(32)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Создание таблицы для связи Issue-Label (Многие-ко-многим) -->
+    <changeSet id="005" author="dev">
+        <createTable tableName="tbl_issue_label">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="issue_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_issue_label_issue" references="tbl_issue(id)"/>
+            </column>
+            <column name="label_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_issue_label_label" references="tbl_label(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="006" author="dev">
+        <addColumn tableName="tbl_comment">
+            <column name="state" type="varchar(16)" defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+
+</databaseChangeLog>

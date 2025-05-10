@@ -1,0 +1,139 @@
+services:
+  social-net-pubilsher:
+    image: significantnose/social-net-publisher:latest  
+    build: ./Publisher/
+    ports:
+      - 24110:24110
+    environment:
+      ConnectionStrings__npg: "User ID=postgres;Host=db;Password=postgres;Port=5432;Database=distcomp;Pooling=true;"
+      ConnectionStrings__redis: "readthis:6379"
+      DiscussionSettings__DiscussionUrl: "http://social-net-discussion:24130"
+      ASPNETCORE_URLS: "http://0.0.0.0:24110"
+      Kafka__BootstrapServer: "kafka:9092"
+      Kafka__ReactionEventsTopic: "InTopic"
+      Kafka__ReactionResponsesTopic: "OutTopic"
+      Kafka__GroupId: "publisher_response_group"
+
+    restart: unless-stopped
+
+    depends_on:
+      db:
+        condition: service_healthy
+      init-kafka:
+        condition: service_completed_successfully
+      # kafka:
+      #   condition: service_started
+
+  social-net-discussion:
+    image: significantnose/social-net-discussion:latest
+    build: ./Discussion/
+    ports:
+      - 24130:24130
+    environment:
+      ReactionDatabase__MongoConnectionString: "mongodb://mango:27017"
+      ReactionDatabase__DatabaseName": "ReactionStore"
+      ReactionDatabase__ReactionCollectionName: "Reaction"
+      ASPNETCORE_URLS: "http://0.0.0.0:24130"
+      Kafka__BootstrapServer: "kafka:9092"
+      Kafka__ReactionEventsTopic: "InTopic"
+      Kafka__ReactionResponsesTopic: "OutTopic"
+      Kafka__GroupId: "discussion_request_group"
+
+    restart: unless-stopped
+
+    depends_on:
+      mango:
+        condition: service_healthy
+      init-kafka:
+        condition: service_completed_successfully
+      # kafka:
+      #   condition: service_started
+
+  db:
+    image: postgres:16.0-alpine
+    container_name: db
+    restart: unless-stopped
+
+    environment:
+      PGPORT: 5432
+      POSTGRES_DB: distcomp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - 5432:5432
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+
+  mango:
+    image: mongo
+    container_name: mango
+    ports:
+      - 9042:27017
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      # KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://kafka:9092
+      # KAFKA_LISTENERS: PLAINTEXT://localhost:9092 
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092 
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      # KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      # KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      # KAFKA_CREATE_TOPICS: >-
+      #   order_events:3:1,
+    ports:
+      - 9092:9092
+
+
+  init-kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - kafka
+    entrypoint: [ '/bin/sh', '-c' ]
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server kafka:9092 --list
+
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic order_events --replication-factor 1 --partitions 3
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic InTopic --replication-factor 1 --partitions 3
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic OutTopic --replication-factor 1 --partitions 3
+
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server kafka:9092 --list
+      "
+
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181 
+      ZOOKEEPER_TICK_TIME: 2000 
+    ports:
+      - 2181:2181
+
+  readthis:
+    image: redis
+    restart: always
+    container_name: readthis
+    ports:
+      - 6379:6379

@@ -1,0 +1,12 @@
+-- +goose Up
+CREATE TABLE tbl_tweet (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES tbl_user(id) ON DELETE CASCADE,
+    title VARCHAR(64) NOT NULL UNIQUE CHECK (LENGTH(title) > 2),
+    content VARCHAR(2048) NOT NULL CHECK (LENGTH(content) > 4),
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- +goose Down
+DROP TABLE tbl_tweet; 

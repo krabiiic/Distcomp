@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+	<changeSet id="1" author="yana">
+		<createTable tableName="tbl_user" schemaName="distcomp">
+			<column name="id" type="bigserial">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="login" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="password" type="varchar(255)"/>
+			<column name="firstname" type="varchar(255)"/>
+			<column name="lastname" type="varchar(255)"/>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="2" author="yana">
+		<createTable tableName="tbl_article" schemaName="distcomp">
+			<column name="id" type="bigserial">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="user_id" type="bigint">
+				<constraints nullable="false"/>
+			</column>
+			<column name="title" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="content" type="text"/>
+			<column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+			<column name="modified" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+		</createTable>
+		<addForeignKeyConstraint baseTableName="tbl_article"
+			baseColumnNames="user_id"
+			referencedTableName="tbl_user"
+			referencedColumnNames="id"
+			constraintName="fk_article_user"/>
+	</changeSet>
+
+	<changeSet id="3" author="yana">
+		<createTable tableName="tbl_note" schemaName="distcomp">
+			<column name="id" type="bigserial">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="article_id" type="bigint">
+				<constraints nullable="false"/>
+			</column>
+			<column name="content" type="text"/>
+		</createTable>
+		<addForeignKeyConstraint baseTableName="tbl_note"
+			baseColumnNames="article_id"
+			referencedTableName="tbl_article"
+			referencedColumnNames="id"
+			constraintName="fk_note_article"/>
+	</changeSet>
+
+	<changeSet id="4" author="yana">
+		<createTable tableName="tbl_sticker" schemaName="distcomp">
+			<column name="id" type="bigserial">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="5" author="yana">
+		<createTable tableName="tbl_article_sticker" schemaName="distcomp">
+			<column name="article_id" type="bigint">
+				<constraints nullable="false"/>
+			</column>
+			<column name="sticker_id" type="bigint">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+		<addPrimaryKey tableName="tbl_article_sticker" columnNames="article_id, sticker_id" constraintName="pk_article_sticker"/>
+		<addForeignKeyConstraint baseTableName="tbl_article_sticker"
+			baseColumnNames="article_id"
+			referencedTableName="tbl_article"
+			referencedColumnNames="id"
+			constraintName="fk_article_sticker_article"/>
+		<addForeignKeyConstraint baseTableName="tbl_article_sticker"
+			baseColumnNames="sticker_id"
+			referencedTableName="tbl_sticker"
+			referencedColumnNames="id"
+			constraintName="fk_article_sticker_sticker"/>
+	</changeSet>
+</databaseChangeLog>

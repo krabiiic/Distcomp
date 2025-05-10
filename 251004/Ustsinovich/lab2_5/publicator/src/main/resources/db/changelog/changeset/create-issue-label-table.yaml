@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_tbl_issue_mark
+      author: Nikita Aleksandrov
+      preConditions:
+        - onFail: MARK_RAN
+          sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'distcomp' AND table_name = 'tbl_issue_mark'
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: issue_id
+                  type: bigint
+              - column:
+                  name: mark_id
+                  type: bigint
+            tableName: tbl_issue_mark
+            schemaName: distcomp
+
+        - addForeignKeyConstraint:
+            baseColumnNames: issue_id
+            baseTableName: tbl_issue_mark
+            baseTableSchemaName: distcomp
+            constraintName: tbl_issue_mark_tbl_issue_fk
+            referencedColumnNames: id
+            referencedTableName: tbl_issue
+            referencedTableSchemaName: distcomp
+
+        - addForeignKeyConstraint:
+            baseColumnNames: mark_id
+            baseTableName: tbl_issue_mark
+            baseTableSchemaName: distcomp
+            constraintName: tbl_issue_mark_tbl_mark_fk
+            referencedColumnNames: id
+            referencedTableName: tbl_mark
+            referencedTableSchemaName: distcomp
+

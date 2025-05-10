@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: Nikita Aleksandrov
+      changes:
+        - createIndex:
+            schemaName: distcomp
+            tableName: tbl_note
+            indexName: tbl_note_issueid_idx
+            columns:
+              - column:
+                  name: issueId

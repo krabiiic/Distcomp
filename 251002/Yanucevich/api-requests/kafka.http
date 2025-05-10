@@ -1,0 +1,23 @@
+GET http://localhost:24110/api/v1.0/reactions
+Content-Type: application/json
+
+
+### new request
+#new
+#
+
+
+POST http://localhost:24110/api/v1.0/tweets
+Content-Type: application/json
+
+{
+    "userId": 1,
+    "title": "title5411",
+    "content": "content647",
+    "markers": [
+        "red4",
+        "green4",
+        "blue4"
+    ]
+}
+

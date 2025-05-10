@@ -1,0 +1,29 @@
+POST http://localhost:24110/api/v1.0/users
+Content-Type: application/json
+
+{
+    "login": "user7349",
+    "password": "asdfghj1738",
+    "firstname": "firstname7178",
+    "lastname": "lastname5330"
+}
+
+### new request
+#new
+#
+
+
+POST http://localhost:24110/api/v1.0/tweets
+Content-Type: application/json
+
+{
+    "userId": 1,
+    "title": "title5411",
+    "content": "content647",
+    "markers": [
+        "red4",
+        "green4",
+        "blue4"
+    ]
+}
+

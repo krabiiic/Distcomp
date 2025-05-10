@@ -1,0 +1,15 @@
+<databaseChangeLog>
+    <changeSet id="1" author="andrey">
+        <createTable tableName="tbl_reaction">
+            <column name="country" type="text" />
+            <column name="topicId" type="bigint" />
+            <column name="id" type="bigint" />
+            <column name="content" type="text" />
+            <primaryKey>
+                <column name="country" />
+                <column name="topicId" />
+                <column name="id" />
+            </primaryKey>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

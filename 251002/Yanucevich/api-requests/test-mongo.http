@@ -1,0 +1,9 @@
+POST http://localhost:24110/api/v1.0/reactions
+Accept-Language: ru,ru-RU;q=0.9,en;q=0.8,en-US;q=0.7,uk;q=0.6,und;q=0.5,de;q=0.4
+Content-Type: application/json
+
+{
+    "tweetId": 2,
+    "content": "content8888"
+}
+

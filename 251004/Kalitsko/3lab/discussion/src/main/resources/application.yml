@@ -1,0 +1,16 @@
+server:
+  port: 24130
+
+spring:
+  cassandra:
+    keyspace-name: post_keyspace
+    schema-action: CREATE_IF_NOT_EXISTS
+    local-datacenter: datacenter1
+    contact-points: localhost
+    username: cassandra
+    password: cassandra
+    request:
+      timeout: 10s
+    connection:
+      connect-timeout: 10s
+      init-query-timeout: 10s

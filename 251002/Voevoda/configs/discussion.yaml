@@ -1,0 +1,21 @@
+server:
+  address: "localhost:24130"
+
+cassandra:
+  hosts:
+    - "localhost:9042"
+  keyspace: "distcomp"
+  username: ""
+  password: ""
+  consistency: "quorum"
+
+logger:
+  level: "info"
+  format: "json"
+  add_source: false
+
+kafka:
+  brokers:
+    - "localhost:9092"
+  in_topic: "input"
+  out_topic: "output"

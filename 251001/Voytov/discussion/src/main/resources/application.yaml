@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: discussion
+
+  cassandra:
+    keyspace-name: distcomp
+    local-datacenter: datacenter1
+
+  liquibase:
+    url: jdbc:cassandra://localhost:9042/distcomp?compliancemode=Liquibase[&localdatacenter=local]
+
+  kafka:
+    topics:
+      notice:
+        in: InTopic
+        out: OutTopic
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      bootstrap-servers: "localhost:9092"
+    consumer:
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      bootstrap-servers: "localhost:9092"
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: org.ex.discussion.dto.request.NoticeRequestDTO
+
+server:
+  port: 24130
+  servlet:
+    context-path: /api/v1.0
