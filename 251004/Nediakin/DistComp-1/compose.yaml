@@ -1,0 +1,6 @@
+﻿services:
+  distcomp-1:
+    image: distcomp-1
+    build:
+      context: .
+      dockerfile: DistComp-1/Dockerfile
