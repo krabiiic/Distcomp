@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: Spoozy
+      changes:
+        - dropPrimaryKey:
+            schemaName: distcomp
+            tableName: tbl_post
+            constraintName: primary key
+
+        - addPrimaryKey:
+            schemaName: distcomp
+            tableName: tbl_post
+            columnNames: id, newsId
+            constraintName: primary key
