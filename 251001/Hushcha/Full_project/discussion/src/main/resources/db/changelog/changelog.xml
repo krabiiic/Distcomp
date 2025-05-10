@@ -1,0 +1,15 @@
+<databaseChangeLog>
+    <changeSet id="1" author="andrey">
+        <createTable tableName="tbl_note">
+            <column name="country" type="text" />
+            <column name="newsId" type="bigint" />
+            <column name="id" type="bigint" />
+            <column name="content" type="text" />
+            <primaryKey>
+                <column name="country" />
+                <column name="newsId" />
+                <column name="id" />
+            </primaryKey>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

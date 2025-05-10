@@ -1,0 +1,2 @@
+kafka-topics.sh --create --topic InTopic --zookeeper  192.168.56.1:2181 --partitions 1 --replication-factor 1
+kafka-topics.sh --create --topic OutTopic --zookeeper  192.168.56.1:2181 --partitions 1 --replication-factor 1

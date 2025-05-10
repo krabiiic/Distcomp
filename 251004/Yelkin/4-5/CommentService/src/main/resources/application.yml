@@ -1,0 +1,26 @@
+server:
+  port: 24130
+
+spring:
+  cassandra:
+    keyspace-name: topic_keyspace
+    schema-action: CREATE_IF_NOT_EXISTS
+    local-datacenter: datacenter1
+    contact-points: localhost
+    username: cassandra
+    password: cassandra
+    request:
+      timeout: 10s
+    connection:
+      connect-timeout: 10s
+      init-query-timeout: 10s
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: by.yelkin.model

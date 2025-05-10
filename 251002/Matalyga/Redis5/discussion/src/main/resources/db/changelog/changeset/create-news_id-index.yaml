@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: Spoozy
+      changes:
+        - createIndex:
+            schemaName: distcomp
+            tableName: tbl_post
+            indexName: tbl_post_newsid_idx
+            columns:
+              - column:
+                  name: newsId

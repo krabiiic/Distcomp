@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend with Crow</title>
+</head>
+<body>
+    <h1>Users</h1>
+
+    <!-- ������ ��� �������� ������������� -->
+    <button id="load-users">Load Users</button>
+
+    <!-- ������ ������������� -->
+    <ul id="user-list">
+        <!-- ����� ����� ������������ ������������ -->
+    </ul>
+
+    <h2>Add New User</h2>
+    <!-- ����� ��� ���������� ������ ������������ -->
+    <form id="add-user-form">
+        <label for="user_name">User Name:</label>
+        <input type="text" id="user_name" name="user_name" required>
+        <button type="submit">Add User</button>
+    </form>
+
+    <script>
+        // ���������� ������� �� ������ ��� �������� �������������
+        document.getElementById('load-users').addEventListener('click', function() {
+            // �������� GET-������� �� ������
+            fetch('http://localhost:18080/api/users')
+                .then(response => {
+                    // ���������, ������� �� ������
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // ��������� ���������� ������ (������� �� �� ��������)
+                    const userList = document.getElementById('user-list');
+                    userList.innerHTML = ''; // ������� ������ ����� ����������� ����� ������
+                    data.forEach(user => {
+                        const li = document.createElement('li');
+                        li.textContent = `ID: ${user.user_id}, Name: ${user.user_name}`;
+                        userList.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        });
+
+        // ���������� �������� ����� ��� ���������� ������ ������������
+        document.getElementById('add-user-form').addEventListener('submit', function(event) {
+            event.preventDefault();  // �������� ����������� ��������� �����
+
+            const userName = document.getElementById('user_name').value;
+
+            // �������� POST-������� � ������� �� ������
+            fetch('http://localhost:18080/api/users/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_name: userName
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('User added successfully!');
+                    document.getElementById('user_name').value = '';  // ������� ���� �����
+                    document.getElementById('load-users').click();  // ������������� ������ �������������
+                } else {
+                    alert('Failed to add user.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error occurred while adding user.');
+            });
+        });
+    </script>
+</body>
+</html>

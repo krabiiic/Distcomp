@@ -1,0 +1,18 @@
+server:
+  port: 24110
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/distcomp
+    username: postgres
+    password: postgres
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+app:
+  clients:
+    comment:
+      url: localhost:24130
+    topic:
+      url: localhost:24110

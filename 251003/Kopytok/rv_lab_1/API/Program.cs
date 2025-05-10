@@ -1,9 +1,11 @@
 using API.Kafka;
+using API.Redis;
 using Application.abstractions;
 using Application.services;
 using Application.Services;
 using Database;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +23,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddSingleton<NoteMessageProducer>();
 builder.Services.AddSingleton<NoteResponseListener>();
 builder.Services.AddHostedService<NoteMessageConsumer>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+    ConnectionMultiplexer.Connect("localhost:6358"));
+builder.Services.AddSingleton<NoteCacheService>();
 
 var app = builder.Build();
 

@@ -1,4 +1,5 @@
 ﻿using API.Kafka;
+using API.Redis;
 using Confluent.Kafka;
 using Core;
 using DTO.requests;
@@ -16,17 +17,30 @@ namespace rv_lab_1.controllers
     {
         private readonly NoteMessageProducer _producer;
         private readonly NoteResponseListener _listener;
+        private readonly NoteCacheService _noteCache;
 
-        public NoteController(NoteMessageProducer producer, NoteResponseListener listener)
+        public NoteController(NoteMessageProducer producer, NoteResponseListener listener, NoteCacheService noteCache)
         {
             _producer = producer;
             _listener = listener;
+            _noteCache = noteCache;
         }
 
 
         [HttpGet("{id:long}")]
         public async Task<ActionResult<NoteResponseTo?>> GetByIdAsync(long id)
         {
+            var cachedNote = await _noteCache.GetNoteAsync(id);
+            if (cachedNote != null)
+            {
+                Console.WriteLine("Cache hit");
+                return Ok(new NoteResponseTo
+                {
+                    Id = cachedNote.Id,
+                    StoryId = cachedNote.StoryId,
+                    Content = cachedNote.Content
+                });
+            }
             var kafkaMessage = new KafkaMessage() { Action = NoteAction.Get, Note = new Note() {Id = id }, State = NoteState.PENDING, RequestId = id };
             var waitTask = _listener.WaitForNoteResponseAsync(id, TimeSpan.FromSeconds(1));
             await _producer.SendMessageAsync(kafkaMessage);
@@ -41,6 +55,8 @@ namespace rv_lab_1.controllers
             }
             Console.WriteLine($" -/-/-/-/-/- GET publisher CORRECT responce id = {id} at {DateTime.Now:HH:mm:ss.fff}");
             var note = responseNote.Note;
+
+            await _noteCache.SetNoteAsync(note);
             var result = new NoteResponseTo() {Id = note.Id, StoryId = note.StoryId, Content = note.Content };
             return Ok(result);
         }
@@ -98,6 +114,7 @@ namespace rv_lab_1.controllers
                 return StatusCode(504);
             }
             Console.WriteLine($" -/-/-/-/-/- PUT publisher CORRECT responce id = {id} at {DateTime.Now:HH:mm:ss.fff}");
+            await _noteCache.RemoveNoteAsync(note.Id);
             return Ok(responseNote.Note);
         }
 
@@ -110,6 +127,7 @@ namespace rv_lab_1.controllers
             await _producer.SendMessageAsync(kafkaMessage);
 
             var responseNote = await waitTask;
+            await _noteCache.RemoveNoteAsync(id);
 
             if (responseNote == null || responseNote.State == NoteState.DECLINE)
             {
