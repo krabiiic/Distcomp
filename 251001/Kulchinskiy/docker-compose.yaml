@@ -1,0 +1,100 @@
+services:
+  backend_redis:
+    container_name: "labs_dc_backend_redis"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "24110:8001"
+    volumes:
+      - ./:/app
+    env_file:
+      - ./.env
+    environment:
+      - DJANGO_PORT=8001
+      - REDIS_MODE=true
+    command: >
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8001"
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    networks:
+      - local-network
+
+  backend_standard:
+    container_name: "labs_dc_backend_standard"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "24130:8002"
+    volumes:
+      - ./:/app
+    env_file:
+      - ./.env
+    environment:
+      - DJANGO_PORT=8002
+      - REDIS_MODE=false
+    command: >
+      sh -c "python manage.py sync_cassandra &&
+             python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8002"
+    restart: unless-stopped
+    depends_on:
+      - db
+      - cassandra
+    networks:
+      - local-network
+
+  db:
+    container_name: "labs_dc_db"
+    image: postgres:latest
+    env_file:
+      - ./.env
+    networks:
+      - local-network
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  cassandra:
+    container_name: "labs_dc_cassandra"
+    image: cassandra:latest
+    env_file:
+      - ./.env
+    ports:
+      - "9042:9042"
+    networks:
+      - local-network
+    healthcheck:
+      test: [ "CMD", "cqlsh", "-e", "DESCRIBE keyspaces" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ADVERTISED_PORT: 9093
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    networks:
+      - local-network
+
+  redis:
+    container_name: "labs_dc_redis"
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - local-network
+
+networks:
+  local-network:
+    driver: bridge
