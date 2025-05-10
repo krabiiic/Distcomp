@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+#  postgres:
+#    image: postgres:latest
+#    container_name: postgres_distcomp
+#    restart: no
+#    environment:
+#      POSTGRES_DB: distcomp
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#  zookeeper:
+#    image: wurstmeister/zookeeper
+#    container_name: zookeeper
+#    ports:
+#      - "2181:2181"
+#    restart: no
+#
+#  kafka:
+#    image: wurstmeister/kafka
+#    container_name: kafka
+#    ports:
+#      - "9092:9092"
+#      - "9093:9093"
+#    environment:
+#      KAFKA_ADVERTISED_HOST_NAME: 192.168.56.1
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    restart: no
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data:/data
+
+#volumes:
+#  postgres_data:
